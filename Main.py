@@ -22,7 +22,6 @@ def main():
         rawCommands = FileParser.getContents
 
         HackAssembler = Assembler.Assembler()
-        HackAssembler.populateSymbols()
         print(HackAssembler)
 
 if __name__ == '__main__': 
