@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>9bcce3ae-839c-4728-9ad9-a504b26ddb99</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Assembler.py</StartupFile>
+    <StartupFile>Main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,8 +22,16 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Assembler.py" />
+    <Compile Include="Assembler.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Main.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Parser.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Symbol.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

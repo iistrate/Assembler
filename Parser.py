@@ -10,8 +10,8 @@ class Parser(object):
         for line in self.__m_file:
             #remove newlines
             line = line.strip()
-            #filter out comments
-            if ('/' not in line and line):
+            #filter out comments and empty lines
+            if (('/' not in line) and line):
                 self.__m_contents.append(line)
     @property
     def getContents(self):
