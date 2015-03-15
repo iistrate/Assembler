@@ -23,6 +23,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assembler.py" />
+    <Compile Include="Parser.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
