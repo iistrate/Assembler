@@ -1,14 +1,22 @@
-import Symbol, Instruction
+import Instruction
 
 class Assembler(object):
     """Assembler, has symbols"""
     def __init__(self):
+        #private
         self.__m_Symbols = list()
-        self.__m_Instructions = list()
+        self.__m_Comps = list()
+        self.__m_Dests = list()
+        self.__m_Jumps = list()
+
         #go ahead and populate symbol table
         self.populateSymbols()
-        #go ahead and populate instruction table
-        self.populateInstructions()
+        #go ahead and populate comp table
+        self.populateComps()
+        #go ahead and populate dests table
+        self.populateDests()
+        #go ahead and populate jump table
+        self.populateJumps()
 
     #string description
     def __str__(self):
@@ -16,72 +24,108 @@ class Assembler(object):
         rep += "Symbols: \n"
         for symbol in self.__m_Symbols:
             rep += "Symbol name: {0} | value: {1}\n".format(symbol.getName, symbol.getValue)
-        rep += "Instructions: \n"
-        for instruction in self.__m_Instructions:
-            rep += "Instruction name: {0} | value: {1}\n".format(instruction.getName, instruction.getValue)
+        rep += "Comps: \n"
+        for comp in self.__m_Comps:
+            rep += "Comp name: {0} | value: {1}\n".format(comp.getName, comp.getValue)
+        rep += "Destinations: \n"
+        for dest in self.__m_Dests:
+            rep += "Dest name: {0} | value: {1}\n".format(dest.getName, dest.getValue)
+        rep += "Jumps: \n"
+        for jump in self.__m_Jumps:
+            rep += "Jump name: {0} | value: {1}\n".format(jump.getName, jump.getValue)
         return rep
     
     #go ahead and populate symbol table
     def populateSymbols(self):
-        self.__m_Symbols.append(Symbol.Symbol('SP', 0))
-        self.__m_Symbols.append(Symbol.Symbol('LCL', 1))
-        self.__m_Symbols.append(Symbol.Symbol('ARG', 2))
-        self.__m_Symbols.append(Symbol.Symbol('THIS', 3))
-        self.__m_Symbols.append(Symbol.Symbol('THAT', 4))
-        self.__m_Symbols.append(Symbol.Symbol('R0', 0))
-        self.__m_Symbols.append(Symbol.Symbol('R1', 1))
-        self.__m_Symbols.append(Symbol.Symbol('R2', 2))
-        self.__m_Symbols.append(Symbol.Symbol('R3', 3))
-        self.__m_Symbols.append(Symbol.Symbol('R4', 4))
-        self.__m_Symbols.append(Symbol.Symbol('R5', 5))
-        self.__m_Symbols.append(Symbol.Symbol('R6', 6))
-        self.__m_Symbols.append(Symbol.Symbol('R7', 7))
-        self.__m_Symbols.append(Symbol.Symbol('R8', 8))
-        self.__m_Symbols.append(Symbol.Symbol('R9', 9))
-        self.__m_Symbols.append(Symbol.Symbol('R10', 10))
-        self.__m_Symbols.append(Symbol.Symbol('R11', 11))
-        self.__m_Symbols.append(Symbol.Symbol('R12', 12))
-        self.__m_Symbols.append(Symbol.Symbol('R13', 13))
-        self.__m_Symbols.append(Symbol.Symbol('R14', 14))
-        self.__m_Symbols.append(Symbol.Symbol('R15', 15))
-        self.__m_Symbols.append(Symbol.Symbol('SCREEN', 16384))
-        self.__m_Symbols.append(Symbol.Symbol('KBD', 24576))
+        #labels
+        self.__m_Symbols.append(Instruction.Instruction('SP', 0))
+        self.__m_Symbols.append(Instruction.Instruction('LCL', 1))
+        self.__m_Symbols.append(Instruction.Instruction('ARG', 2))
+        self.__m_Symbols.append(Instruction.Instruction('THIS', 3))
+        self.__m_Symbols.append(Instruction.Instruction('THAT', 4))
+        self.__m_Symbols.append(Instruction.Instruction('R0', 0))
+        self.__m_Symbols.append(Instruction.Instruction('R1', 1))
+        self.__m_Symbols.append(Instruction.Instruction('R2', 2))
+        self.__m_Symbols.append(Instruction.Instruction('R3', 3))
+        self.__m_Symbols.append(Instruction.Instruction('R4', 4))
+        self.__m_Symbols.append(Instruction.Instruction('R5', 5))
+        self.__m_Symbols.append(Instruction.Instruction('R6', 6))
+        self.__m_Symbols.append(Instruction.Instruction('R7', 7))
+        self.__m_Symbols.append(Instruction.Instruction('R8', 8))
+        self.__m_Symbols.append(Instruction.Instruction('R9', 9))
+        self.__m_Symbols.append(Instruction.Instruction('R10', 10))
+        self.__m_Symbols.append(Instruction.Instruction('R11', 11))
+        self.__m_Symbols.append(Instruction.Instruction('R12', 12))
+        self.__m_Symbols.append(Instruction.Instruction('R13', 13))
+        self.__m_Symbols.append(Instruction.Instruction('R14', 14))
+        self.__m_Symbols.append(Instruction.Instruction('R15', 15))
+        self.__m_Symbols.append(Instruction.Instruction('SCREEN', 16384))
+        self.__m_Symbols.append(Instruction.Instruction('KBD', 24576))
 
     def getSymbols(self):
         return self.__m_Symbols
 
+    def getComps(self):
+        return self.__m_Comps
+
+    def getJumps(self):
+        return self.__m_Jumps
+
+    def getDests(self):
+        return self.__m_Dests
+
     #go ahead and populate instruction table
-    def populateInstructions(self):
-        self.__m_Instructions.append(Instruction.Instruction('0', '0101010'))
-        self.__m_Instructions.append(Instruction.Instruction('1', '0111111'))
-        self.__m_Instructions.append(Instruction.Instruction('-1', '0111010'))
-        self.__m_Instructions.append(Instruction.Instruction('D', '0001100'))
-        self.__m_Instructions.append(Instruction.Instruction('A', '0110000'))
-        self.__m_Instructions.append(Instruction.Instruction('M', '1110000'))
-        self.__m_Instructions.append(Instruction.Instruction('!D', '0001101'))
-        self.__m_Instructions.append(Instruction.Instruction('!A', '0110001'))
-        self.__m_Instructions.append(Instruction.Instruction('!M', '1110001'))
-        self.__m_Instructions.append(Instruction.Instruction('-D', '0001111'))
-        self.__m_Instructions.append(Instruction.Instruction('-A', '0110011'))
-        self.__m_Instructions.append(Instruction.Instruction('-M', '1110011'))
-        self.__m_Instructions.append(Instruction.Instruction('D+1', '0011111'))
-        self.__m_Instructions.append(Instruction.Instruction('A+1', '0110111'))
-        self.__m_Instructions.append(Instruction.Instruction('M+1', '1110111'))
-        self.__m_Instructions.append(Instruction.Instruction('D-1', '0001110'))
-        self.__m_Instructions.append(Instruction.Instruction('A-1', '0110010'))
-        self.__m_Instructions.append(Instruction.Instruction('M-1', '1110010'))
-        self.__m_Instructions.append(Instruction.Instruction('D+A', '0000010'))
-        self.__m_Instructions.append(Instruction.Instruction('D+M', '1000010'))
-        self.__m_Instructions.append(Instruction.Instruction('D-A', '0010011'))
-        self.__m_Instructions.append(Instruction.Instruction('D-M', '1010011'))
-        self.__m_Instructions.append(Instruction.Instruction('A-D', '0000111'))
-        self.__m_Instructions.append(Instruction.Instruction('M-D', '1000111'))
-        self.__m_Instructions.append(Instruction.Instruction('D&A', '0000000'))
-        self.__m_Instructions.append(Instruction.Instruction('D&M', '1000000'))
-        self.__m_Instructions.append(Instruction.Instruction('D|A', '0010101'))
-        self.__m_Instructions.append(Instruction.Instruction('D|M', '1010101'))
+    def populateComps(self):
+        #comp
+        self.__m_Comps.append(Instruction.Instruction('0', '0101010'))
+        self.__m_Comps.append(Instruction.Instruction('1', '0111111'))
+        self.__m_Comps.append(Instruction.Instruction('-1', '0111010'))
+        self.__m_Comps.append(Instruction.Instruction('D', '0001100'))
+        self.__m_Comps.append(Instruction.Instruction('A', '0110000'))
+        self.__m_Comps.append(Instruction.Instruction('M', '1110000'))
+        self.__m_Comps.append(Instruction.Instruction('!D', '0001101'))
+        self.__m_Comps.append(Instruction.Instruction('!A', '0110001'))
+        self.__m_Comps.append(Instruction.Instruction('!M', '1110001'))
+        self.__m_Comps.append(Instruction.Instruction('-D', '0001111'))
+        self.__m_Comps.append(Instruction.Instruction('-A', '0110011'))
+        self.__m_Comps.append(Instruction.Instruction('-M', '1110011'))
+        self.__m_Comps.append(Instruction.Instruction('D+1', '0011111'))
+        self.__m_Comps.append(Instruction.Instruction('A+1', '0110111'))
+        self.__m_Comps.append(Instruction.Instruction('M+1', '1110111'))
+        self.__m_Comps.append(Instruction.Instruction('D-1', '0001110'))
+        self.__m_Comps.append(Instruction.Instruction('A-1', '0110010'))
+        self.__m_Comps.append(Instruction.Instruction('M-1', '1110010'))
+        self.__m_Comps.append(Instruction.Instruction('D+A', '0000010'))
+        self.__m_Comps.append(Instruction.Instruction('D+M', '1000010'))
+        self.__m_Comps.append(Instruction.Instruction('D-A', '0010011'))
+        self.__m_Comps.append(Instruction.Instruction('D-M', '1010011'))
+        self.__m_Comps.append(Instruction.Instruction('A-D', '0000111'))
+        self.__m_Comps.append(Instruction.Instruction('M-D', '1000111'))
+        self.__m_Comps.append(Instruction.Instruction('D&A', '0000000'))
+        self.__m_Comps.append(Instruction.Instruction('D&M', '1000000'))
+        self.__m_Comps.append(Instruction.Instruction('D|A', '0010101'))
+        self.__m_Comps.append(Instruction.Instruction('D|M', '1010101'))
 
+    #populate destinations
+    def populateDests(self):
+        #dest
+        self.__m_Dests.append(Instruction.Instruction('null', '000'))
+        self.__m_Dests.append(Instruction.Instruction('M', '001'))
+        self.__m_Dests.append(Instruction.Instruction('D', '010'))
+        self.__m_Dests.append(Instruction.Instruction('MD', '011'))
+        self.__m_Dests.append(Instruction.Instruction('A', '100'))
+        self.__m_Dests.append(Instruction.Instruction('AM', '101'))
+        self.__m_Dests.append(Instruction.Instruction('AD', '110'))
+        self.__m_Dests.append(Instruction.Instruction('AMD', '111'))
 
-
-    def getInstructions(self):
-        return self.__m_Instructions
+    #populate jumps
+    def populateJumps(self):
+        #jumps
+        self.__m_Jumps.append(Instruction.Instruction('null', '000'))
+        self.__m_Jumps.append(Instruction.Instruction('JGT', '001'))
+        self.__m_Jumps.append(Instruction.Instruction('JEQ', '010'))
+        self.__m_Jumps.append(Instruction.Instruction('JGE', '011'))
+        self.__m_Jumps.append(Instruction.Instruction('JLT', '100'))
+        self.__m_Jumps.append(Instruction.Instruction('JNE', '101'))
+        self.__m_Jumps.append(Instruction.Instruction('JLE', '110'))
+        self.__m_Jumps.append(Instruction.Instruction('JMP', '111'))
