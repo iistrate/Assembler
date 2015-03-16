@@ -7,7 +7,7 @@ class Instruction(object):
     def __str__(self):
         rep = "Instruction name: {0} | value: {1}".format(getName, getValue)
         return rep
-
+    
     @property
     def getValue(self):
         return self.__m_value

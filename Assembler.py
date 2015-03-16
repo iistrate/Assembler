@@ -39,23 +39,12 @@ class Assembler(object):
                 self.__m_translated.append(self.__m_preA + self.toBinary(line[1:]))
             #if not A then C instruction
             else:
-                a = jump = dest = comp = ''
-                #check if jump
-                if ';' in line:
-                    #get jump portion
-                    jump = self.getJump(line)
-                    self.__m_translated.append(jump)
-                #check if assign
-                if '=' in line:
-                    #get dest and comp portions
-                    destAndComp = self.getDestAndComp(line)
-                    comp = destAndComp[0]
-                    dest = destAndComp[1]
-
-                a = 0
-                if not jump: jump = '000'
-                if not dest: dest = '000'
-                if not comp: comp = '0000'
+                if ';' or '=' in line:
+                    translated = self.translateC(line)
+                    a = translated[0]
+                    comp = translated[1]
+                    dest = translated[2]
+                    jump = translated[3]
 
                 self.__m_translated.append('{0}{1}{2}{3}{4}'.format(self.__m_preC, a, comp, dest, jump))
 
@@ -75,34 +64,44 @@ class Assembler(object):
     def isA(self, line):
         if (line[0] == '@') and (not self.isSymbol(line)):
             return True
-    #if line is a C instruction
-    #get jump portion
-    def getJump(self, line):
-        #get index where the jmp begins
-        index = line.find(';')
-        #get jump type
-        jumpName = line[index+1:]
-        #get binary representation
-        for jump in self.__m_Jumps:
-            if jump.getName == jumpName:
-                return jump.getValue
 
-    #get dest portion
-    def getDestAndComp(self, line):
-        #get index where dest begins
-        index = line.find('=')
-        #get destination type
-        destName = line[0:index]
-        compName = line[index+1:]
-        #get binary representation for dest
-        for dest in self.__m_Dests:
-            if dest.getName == destName:
-                destination = dest.getValue
-        #get binary representation for comp
-        for comp in self.__m_Comps:
-            if comp.getName == compName:
-                comps = comp.getValue
-        return (comps, destination)
+    #if line is a C instruction
+    def translateC(self, line):
+        a = comp = dest = jump = ''
+        #get jump portion and comp
+        if ';' in line:
+            #get index where the jmp begins
+            index = line.find(';')
+            #get jump type
+            jumpName = line[index+1:]
+            #see if there's an M in comp part
+            if 'M' in line[:index]: a = '1'
+            #get binary representation
+            jump = self.getValueByName(jumpName, self.__m_Jumps)
+        elif '=' in line:
+            #get index where dest begins
+            index = line.find('=')
+            #get destination type
+            destName = line[0:index]
+            compName = line[index+1:]
+            #see if there's an M in comp part
+            if 'M' in line[index:]: a = '1'
+            #get binary representation
+            comp = self.getValueByName(compName, self.__m_Comps)
+            dest = self.getValueByName(destName, self.__m_Dests)
+
+        if not comp: comp = '000000'
+        if not dest: dest = '000'
+        if not jump: jump = '000'
+        if not a: a = '0'
+
+        return (a, comp, dest, jump)
+
+    def getValueByName(self, name, list):
+        #get binary representation
+        for item in list:
+            if item.getName == name:
+                return item.getValue
 
     #output translated commands to file
     def outputFile(self):
