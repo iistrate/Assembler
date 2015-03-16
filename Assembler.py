@@ -2,13 +2,23 @@ import Instruction
 
 class Assembler(object):
     """Assembler, has symbols"""
-    def __init__(self):
-        #private
+    def __init__(self, commands):
+        #object lists
         self.__m_Symbols = list()
         self.__m_Comps = list()
         self.__m_Dests = list()
         self.__m_Jumps = list()
+        #end objects
 
+        #holds raw commands
+        self.__m_rawCommands = commands
+        #final translated commands
+        self.__m_translated = list()
+        #if A instruction prepend 0; if C instruction prepend 111
+        self.__m_preA = '0'
+        self.__m_preC = '111'
+
+        #calls
         #go ahead and populate symbol table
         self.populateSymbols()
         #go ahead and populate comp table
@@ -17,6 +27,23 @@ class Assembler(object):
         self.populateDests()
         #go ahead and populate jump table
         self.populateJumps()
+
+    
+    def translate(self):
+        for line in self.__m_rawCommands:
+            print(line)
+            pass
+
+    #check if line represents a symbol
+    def isSymbol(self, line):
+        if line[0] == '@':
+            return True
+        return False
+    #check if line represents a label
+    def isLabel(self, line):
+        if line[0] == '(' and line[-1] == ')':
+            return True
+        return False
 
     #string description
     def __str__(self):
@@ -61,18 +88,6 @@ class Assembler(object):
         self.__m_Symbols.append(Instruction.Instruction('R15', 15))
         self.__m_Symbols.append(Instruction.Instruction('SCREEN', 16384))
         self.__m_Symbols.append(Instruction.Instruction('KBD', 24576))
-
-    def getSymbols(self):
-        return self.__m_Symbols
-
-    def getComps(self):
-        return self.__m_Comps
-
-    def getJumps(self):
-        return self.__m_Jumps
-
-    def getDests(self):
-        return self.__m_Dests
 
     #go ahead and populate instruction table
     def populateComps(self):
@@ -129,3 +144,15 @@ class Assembler(object):
         self.__m_Jumps.append(Instruction.Instruction('JNE', '101'))
         self.__m_Jumps.append(Instruction.Instruction('JLE', '110'))
         self.__m_Jumps.append(Instruction.Instruction('JMP', '111'))
+
+    def getSymbols(self):
+        return self.__m_Symbols
+
+    def getComps(self):
+        return self.__m_Comps
+
+    def getJumps(self):
+        return self.__m_Jumps
+
+    def getDests(self):
+        return self.__m_Dests

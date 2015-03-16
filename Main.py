@@ -21,8 +21,8 @@ def main():
         #list of commands to be interpreted
         rawCommands = FileParser.getContents
 
-        HackAssembler = Assembler.Assembler()
-        print(HackAssembler)
+        HackAssembler = Assembler.Assembler(rawCommands)
+        outfile = HackAssembler.translate()
 
 if __name__ == '__main__': 
     main()
