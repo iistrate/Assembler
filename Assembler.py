@@ -3,12 +3,13 @@ import Instruction
 class Assembler(object):
     """Assembler, has symbols"""
     #constructor
-    def __init__(self, commands):
+    def __init__(self, commands, fileName):
         #object lists
         self.__m_Symbols = list()
         self.__m_Comps = list()
         self.__m_Dests = list()
         self.__m_Jumps = list()
+        self.__m_FileName = fileName.split('.')[0] + '.hack'
         #end objects
 
         #holds raw commands
@@ -38,6 +39,7 @@ class Assembler(object):
                 self.__m_translated.append(self.__m_preA + self.toBinary(line[1:]))
             #if not A then C instruction
             else:
+                a = jump = dest = comp = ''
                 #check if jump
                 if ';' in line:
                     #get jump portion
@@ -45,9 +47,17 @@ class Assembler(object):
                     self.__m_translated.append(jump)
                 #check if assign
                 if '=' in line:
-                    #get dest portion
-                    dest = self.getDest(line)
-                    self.__m_translated.append(dest)
+                    #get dest and comp portions
+                    destAndComp = self.getDestAndComp(line)
+                    comp = destAndComp[0]
+                    dest = destAndComp[1]
+
+                a = 0
+                if not jump: jump = '000'
+                if not dest: dest = '000'
+                if not comp: comp = '0000'
+
+                self.__m_translated.append('{0}{1}{2}{3}{4}'.format(self.__m_preC, a, comp, dest, jump))
 
         return self.__m_translated
     
@@ -78,15 +88,29 @@ class Assembler(object):
                 return jump.getValue
 
     #get dest portion
-    def getDest(self, line):
+    def getDestAndComp(self, line):
         #get index where dest begins
         index = line.find('=')
         #get destination type
         destName = line[0:index]
-        #get binary representation
+        compName = line[index+1:]
+        #get binary representation for dest
         for dest in self.__m_Dests:
             if dest.getName == destName:
-                return dest.getValue        
+                destination = dest.getValue
+        #get binary representation for comp
+        for comp in self.__m_Comps:
+            if comp.getName == compName:
+                comps = comp.getValue
+        return (comps, destination)
+
+    #output translated commands to file
+    def outputFile(self):
+        output = open(self.__m_FileName, 'w')
+        for line in self.__m_translated:
+            output.writelines('{0}\n'.format(line))
+        output.close()
+
     #
     # Helpers, and Tables construction
     #
@@ -149,34 +173,34 @@ class Assembler(object):
     #go ahead and populate instruction table
     def populateComps(self):
         #comp
-        self.__m_Comps.append(Instruction.Instruction('0', '0101010'))
-        self.__m_Comps.append(Instruction.Instruction('1', '0111111'))
-        self.__m_Comps.append(Instruction.Instruction('-1', '0111010'))
-        self.__m_Comps.append(Instruction.Instruction('D', '0001100'))
-        self.__m_Comps.append(Instruction.Instruction('A', '0110000'))
-        self.__m_Comps.append(Instruction.Instruction('M', '1110000'))
-        self.__m_Comps.append(Instruction.Instruction('!D', '0001101'))
-        self.__m_Comps.append(Instruction.Instruction('!A', '0110001'))
-        self.__m_Comps.append(Instruction.Instruction('!M', '1110001'))
-        self.__m_Comps.append(Instruction.Instruction('-D', '0001111'))
-        self.__m_Comps.append(Instruction.Instruction('-A', '0110011'))
-        self.__m_Comps.append(Instruction.Instruction('-M', '1110011'))
-        self.__m_Comps.append(Instruction.Instruction('D+1', '0011111'))
-        self.__m_Comps.append(Instruction.Instruction('A+1', '0110111'))
-        self.__m_Comps.append(Instruction.Instruction('M+1', '1110111'))
-        self.__m_Comps.append(Instruction.Instruction('D-1', '0001110'))
-        self.__m_Comps.append(Instruction.Instruction('A-1', '0110010'))
-        self.__m_Comps.append(Instruction.Instruction('M-1', '1110010'))
-        self.__m_Comps.append(Instruction.Instruction('D+A', '0000010'))
-        self.__m_Comps.append(Instruction.Instruction('D+M', '1000010'))
-        self.__m_Comps.append(Instruction.Instruction('D-A', '0010011'))
-        self.__m_Comps.append(Instruction.Instruction('D-M', '1010011'))
-        self.__m_Comps.append(Instruction.Instruction('A-D', '0000111'))
-        self.__m_Comps.append(Instruction.Instruction('M-D', '1000111'))
-        self.__m_Comps.append(Instruction.Instruction('D&A', '0000000'))
-        self.__m_Comps.append(Instruction.Instruction('D&M', '1000000'))
-        self.__m_Comps.append(Instruction.Instruction('D|A', '0010101'))
-        self.__m_Comps.append(Instruction.Instruction('D|M', '1010101'))
+        self.__m_Comps.append(Instruction.Instruction('0', '101010'))
+        self.__m_Comps.append(Instruction.Instruction('1', '111111'))
+        self.__m_Comps.append(Instruction.Instruction('-1', '111010'))
+        self.__m_Comps.append(Instruction.Instruction('D', '001100'))
+        self.__m_Comps.append(Instruction.Instruction('A', '110000'))
+        self.__m_Comps.append(Instruction.Instruction('M', '110000'))
+        self.__m_Comps.append(Instruction.Instruction('!D', '001101'))
+        self.__m_Comps.append(Instruction.Instruction('!A', '110001'))
+        self.__m_Comps.append(Instruction.Instruction('!M', '110001'))
+        self.__m_Comps.append(Instruction.Instruction('-D', '001111'))
+        self.__m_Comps.append(Instruction.Instruction('-A', '110011'))
+        self.__m_Comps.append(Instruction.Instruction('-M', '110011'))
+        self.__m_Comps.append(Instruction.Instruction('D+1', '011111'))
+        self.__m_Comps.append(Instruction.Instruction('A+1', '110111'))
+        self.__m_Comps.append(Instruction.Instruction('M+1', '110111'))
+        self.__m_Comps.append(Instruction.Instruction('D-1', '001110'))
+        self.__m_Comps.append(Instruction.Instruction('A-1', '110010'))
+        self.__m_Comps.append(Instruction.Instruction('M-1', '110010'))
+        self.__m_Comps.append(Instruction.Instruction('D+A', '000010'))
+        self.__m_Comps.append(Instruction.Instruction('D+M', '000010'))
+        self.__m_Comps.append(Instruction.Instruction('D-A', '010011'))
+        self.__m_Comps.append(Instruction.Instruction('D-M', '010011'))
+        self.__m_Comps.append(Instruction.Instruction('A-D', '000111'))
+        self.__m_Comps.append(Instruction.Instruction('M-D', '000111'))
+        self.__m_Comps.append(Instruction.Instruction('D&A', '000000'))
+        self.__m_Comps.append(Instruction.Instruction('D&M', '000000'))
+        self.__m_Comps.append(Instruction.Instruction('D|A', '010101'))
+        self.__m_Comps.append(Instruction.Instruction('D|M', '010101'))
 
     #populate destinations
     def populateDests(self):
