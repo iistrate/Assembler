@@ -32,15 +32,25 @@ class Assembler(object):
     #translate the raw commands into binary
     def translate(self):
         for line in self.__m_rawCommands:
+            #check if A instruction
             if (self.isA(line)):
                 #translate into binary and add a 0 at beginning
                 self.__m_translated.append(self.__m_preA + self.toBinary(line[1:]))
+            #if not A then C instruction
+            else:
+                #check if jump
+                if ';' in line:
+                    #get jump portion
+                    jump = self.getJump(line)
+                    self.__m_translated.append(jump)
+                #check if assign
+                if '=' in line:
+                    #get dest portion
+                    dest = self.getDest(line)
+                    self.__m_translated.append(dest)
+
         return self.__m_translated
     
-    #
-    #   Checkers
-    #
-
     #check if line represents a symbol
     def isSymbol(self, line):
         if (line[0] == '@') and (line[1:] in self.__m_Symbols):
@@ -55,8 +65,28 @@ class Assembler(object):
     def isA(self, line):
         if (line[0] == '@') and (not self.isSymbol(line)):
             return True
-    
-        
+    #if line is a C instruction
+    #get jump portion
+    def getJump(self, line):
+        #get index where the jmp begins
+        index = line.find(';')
+        #get jump type
+        jumpName = line[index+1:]
+        #get binary representation
+        for jump in self.__m_Jumps:
+            if jump.getName == jumpName:
+                return jump.getValue
+
+    #get dest portion
+    def getDest(self, line):
+        #get index where dest begins
+        index = line.find('=')
+        #get destination type
+        destName = line[0:index]
+        #get binary representation
+        for dest in self.__m_Dests:
+            if dest.getName == destName:
+                return dest.getValue        
     #
     # Helpers, and Tables construction
     #
