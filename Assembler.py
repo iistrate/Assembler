@@ -2,6 +2,7 @@ import Instruction
 
 class Assembler(object):
     """Assembler, has symbols"""
+    #constructor
     def __init__(self, commands):
         #object lists
         self.__m_Symbols = list()
@@ -28,15 +29,21 @@ class Assembler(object):
         #go ahead and populate jump table
         self.populateJumps()
 
-    
+    #translate the raw commands into binary
     def translate(self):
         for line in self.__m_rawCommands:
-            print(line)
-            pass
+            if (self.isA(line)):
+                #translate into binary and add a 0 at beginning
+                self.__m_translated.append(self.__m_preA + self.toBinary(line[1:]))
+        return self.__m_translated
+    
+    #
+    #   Checkers
+    #
 
     #check if line represents a symbol
     def isSymbol(self, line):
-        if line[0] == '@':
+        if (line[0] == '@') and (line[1:] in self.__m_Symbols):
             return True
         return False
     #check if line represents a label
@@ -44,6 +51,26 @@ class Assembler(object):
         if line[0] == '(' and line[-1] == ')':
             return True
         return False
+    #check if line is an A instruction
+    def isA(self, line):
+        if (line[0] == '@') and (not self.isSymbol(line)):
+            return True
+    
+        
+    #
+    # Helpers, and Tables construction
+    #
+
+    #get 15 digit binary
+    @staticmethod
+    def toBinary(integer):
+        prepend = ''
+        binary = "{0:b}".format(int(integer))
+        if (len(binary) != 15):
+            size = 15 - len(binary)
+        for i in range(size):
+            prepend += '0'
+        return prepend+binary
 
     #string description
     def __str__(self):

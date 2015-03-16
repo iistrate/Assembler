@@ -23,6 +23,7 @@ def main():
 
         HackAssembler = Assembler.Assembler(rawCommands)
         outfile = HackAssembler.translate()
+        print(outfile)
 
 if __name__ == '__main__': 
     main()
