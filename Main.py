@@ -8,7 +8,7 @@ def main():
     while (askForFile):
         try:
             #fileName = input("Please enter file name to read: ")
-            fileName = "Add.asm"
+            fileName = "Max.asm"
             asmFile = open(fileName, 'r')
             askForFile = False
         except:

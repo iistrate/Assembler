@@ -78,6 +78,9 @@ class Assembler(object):
             if 'M' in line[:index]: a = '1'
             #get binary representation
             jump = self.getValueByName(jumpName, self.__m_Jumps)
+            compName = line[:index]
+            comp = self.getValueByName(compName, self.__m_Comps)
+
         elif '=' in line:
             #get index where dest begins
             index = line.find('=')
@@ -121,8 +124,8 @@ class Assembler(object):
         binary = "{0:b}".format(int(integer))
         if (len(binary) != 15):
             size = 15 - len(binary)
-        for i in range(size):
-            prepend += '0'
+            for i in range(size):
+                prepend += '0'
         return prepend+binary
 
     #string description
