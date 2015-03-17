@@ -8,7 +8,7 @@ def main():
     while (askForFile):
         try:
             #fileName = input("Please enter file name to read: ")
-            fileName = "Rect.asm"
+            fileName = "Pong.asm"
             asmFile = open(fileName, 'r')
             askForFile = False
         except:
@@ -22,6 +22,7 @@ def main():
         rawCommands = FileParser.getContents
 
         HackAssembler = Assembler.Assembler(rawCommands, fileName)
+        HackAssembler.addUserSymbols()
         HackAssembler.translate()
         HackAssembler.outputFile()
 

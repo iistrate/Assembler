@@ -10,6 +10,9 @@ class Assembler(object):
         self.__m_Dests = list()
         self.__m_Jumps = list()
         #end objects
+
+        self.__m_rom = 0
+        self.__m_ram = 16
         
         #filename renamed
         self.__m_FileName = fileName.split('.')[0] + '.hack'
@@ -31,22 +34,49 @@ class Assembler(object):
         self.populateDests()
         #go ahead and populate jump table
         self.populateJumps()
-    #translate the raw commands into binary
+
+    #part of pass 1
+    def addUserLabels(self):
+        for line in self.__m_rawCommands:
+            if (self.isLabel(line)):
+                #cut out first and last ()
+                name = line[1:-1]
+                #append label and rom to label table
+                self.__m_Symbols.append((Instruction.Instruction(name, self.__m_rom)))
+            else:
+                self.__m_rom += 1
+    #essentially pass 1
+    def addUserSymbols(self):
+        self.addUserLabels()
+        #user defined symbols (check on address start and increment)
+        for line in self.__m_rawCommands:
+            name = line[1:];
+            if self.isA(line) and (not name.isdigit()) and (not self.isNameInTable(name, self.__m_Symbols)):
+                #test if symbol is added at the right address
+                #print("symbol is {0}, address is {1}".format(name, self.__m_ram))
+                #end test
+                self.__m_Symbols.append(Instruction.Instruction(name, self.__m_ram))
+                self.__m_ram += 1 
+                       
+
+    #translate the raw commands into binary aka pass2
     def translate(self):
         for line in self.__m_rawCommands:
             #if A instruction
             if (self.isA(line)):
                 #everything after @
                 value = line[1:]
+                #integer values
                 if (value.isdigit()):
                     #translate into binary and add a 0 at beginning
                     self.__m_translated.append(self.__m_preA + self.toBinary(line[1:]))
-                #must be a name reffering to an address
+                #variable integer value
                 else:
                     name = value
                     #get integer value from symbol table
                     value = self.getValueByName(name, self.__m_Symbols)
                     self.__m_translated.append(self.__m_preA + self.toBinary(value))
+                self.__m_rom += 1
             #if C instruction
             else:
                 if (not self.isLabel(line)):
@@ -55,9 +85,9 @@ class Assembler(object):
                         a = translated[0]
                         comp = translated[1]
                         dest = translated[2]
-                        jump = translated[3]
-                
+                        jump = translated[3]              
                         self.__m_translated.append('{0}{1}{2}{3}{4}'.format(self.__m_preC, a, comp, dest, jump))
+                        self.__m_rom += 1
         return self.__m_translated
     
     #check if line represents a label
@@ -87,7 +117,6 @@ class Assembler(object):
             jump = self.getValueByName(jumpName, self.__m_Jumps)
             compName = line[:index]
             comp = self.getValueByName(compName, self.__m_Comps)
-
         elif '=' in line:
             #get index where dest begins
             index = line.find('=')
@@ -160,7 +189,7 @@ class Assembler(object):
             rep += "Jump name: {0} | value: {1}\n".format(jump.getName, jump.getValue)
         return rep
     
-    #go ahead and populate symbol table
+    #go ahead and populate symbol table with known values
     def populateSymbols(self):
         #symbols we know of
         self.__m_Symbols.append(Instruction.Instruction('SP', 0))
@@ -186,17 +215,6 @@ class Assembler(object):
         self.__m_Symbols.append(Instruction.Instruction('R15', 15))
         self.__m_Symbols.append(Instruction.Instruction('SCREEN', 16384))
         self.__m_Symbols.append(Instruction.Instruction('KBD', 24576))
-
-        #user defined symbols (check on address start and increment)
-        address = 16
-        for line in self.__m_rawCommands:
-            name = line[1:];
-            if (('@' in line) and not line[1:].isdigit()) and (not self.isNameInTable(name, self.__m_Symbols)):
-                #test if symbol is added at the right address
-                #print("symbol is {0}, address is {1}".format(name, address))
-                #end test
-                self.__m_Symbols.append(Instruction.Instruction(name, address))
-                address += 1
 
     #go ahead and populate instruction table
     def populateComps(self):
