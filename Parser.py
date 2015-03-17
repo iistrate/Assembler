@@ -8,10 +8,13 @@ class Parser(object):
 
     def parseFile(self):
         for line in self.__m_file:
+            #remove out comments
+            indexOfComment = line.find('/')
+            line = line[:indexOfComment]
             #remove newlines
             line = line.strip()
-            #filter out comments and empty lines
-            if (('/' not in line) and line):
+            #remove empty lines
+            if (line):
                 self.__m_contents.append(line)
     @property
     def getContents(self):

@@ -9,8 +9,10 @@ class Assembler(object):
         self.__m_Comps = list()
         self.__m_Dests = list()
         self.__m_Jumps = list()
-        self.__m_FileName = fileName.split('.')[0] + '.hack'
         #end objects
+        
+        #filename renamed
+        self.__m_FileName = fileName.split('.')[0] + '.hack'
 
         #holds raw commands
         self.__m_rawCommands = commands
@@ -29,42 +31,47 @@ class Assembler(object):
         self.populateDests()
         #go ahead and populate jump table
         self.populateJumps()
-
     #translate the raw commands into binary
     def translate(self):
         for line in self.__m_rawCommands:
-            #check if A instruction
+            #if A instruction
             if (self.isA(line)):
-                #translate into binary and add a 0 at beginning
-                self.__m_translated.append(self.__m_preA + self.toBinary(line[1:]))
-            #if not A then C instruction
+                #everything after @
+                value = line[1:]
+                if (value.isdigit()):
+                    #translate into binary and add a 0 at beginning
+                    self.__m_translated.append(self.__m_preA + self.toBinary(line[1:]))
+                #must be a name reffering to an address
+                else:
+                    name = value
+                    #get integer value from symbol table
+                    value = self.getValueByName(name, self.__m_Symbols)
+                    self.__m_translated.append(self.__m_preA + self.toBinary(value))
+            #if C instruction
             else:
-                if ';' or '=' in line:
-                    translated = self.translateC(line)
-                    a = translated[0]
-                    comp = translated[1]
-                    dest = translated[2]
-                    jump = translated[3]
-
-                self.__m_translated.append('{0}{1}{2}{3}{4}'.format(self.__m_preC, a, comp, dest, jump))
-
+                if (not self.isLabel(line)):
+                    if ';' or '=' in line:
+                        translated = self.translateC(line)
+                        a = translated[0]
+                        comp = translated[1]
+                        dest = translated[2]
+                        jump = translated[3]
+                
+                        self.__m_translated.append('{0}{1}{2}{3}{4}'.format(self.__m_preC, a, comp, dest, jump))
         return self.__m_translated
     
-    #check if line represents a symbol
-    def isSymbol(self, line):
-        if (line[0] == '@') and (line[1:] in self.__m_Symbols):
-            return True
-        return False
     #check if line represents a label
     def isLabel(self, line):
         if line[0] == '(' and line[-1] == ')':
             return True
         return False
+
     #check if line is an A instruction
     def isA(self, line):
-        if (line[0] == '@') and (not self.isSymbol(line)):
+        if '@' in line:
             return True
-
+        return False
+    
     #if line is a C instruction
     def translateC(self, line):
         a = comp = dest = jump = ''
@@ -101,10 +108,17 @@ class Assembler(object):
         return (a, comp, dest, jump)
 
     def getValueByName(self, name, list):
-        #get binary representation
+        #find value by name from table 
         for item in list:
             if item.getName == name:
                 return item.getValue
+    
+    def isNameInTable(self, name, list):
+        #find if name in table
+        for item in list:
+            if item.getName == name:
+                return True
+        return False
 
     #output translated commands to file
     def outputFile(self):
@@ -122,6 +136,7 @@ class Assembler(object):
     def toBinary(integer):
         prepend = ''
         binary = "{0:b}".format(int(integer))
+        #if the length of binary < 15 prepend 0's
         if (len(binary) != 15):
             size = 15 - len(binary)
             for i in range(size):
@@ -147,7 +162,7 @@ class Assembler(object):
     
     #go ahead and populate symbol table
     def populateSymbols(self):
-        #labels
+        #symbols we know of
         self.__m_Symbols.append(Instruction.Instruction('SP', 0))
         self.__m_Symbols.append(Instruction.Instruction('LCL', 1))
         self.__m_Symbols.append(Instruction.Instruction('ARG', 2))
@@ -171,6 +186,17 @@ class Assembler(object):
         self.__m_Symbols.append(Instruction.Instruction('R15', 15))
         self.__m_Symbols.append(Instruction.Instruction('SCREEN', 16384))
         self.__m_Symbols.append(Instruction.Instruction('KBD', 24576))
+
+        #user defined symbols (check on address start and increment)
+        address = 16
+        for line in self.__m_rawCommands:
+            name = line[1:];
+            if (('@' in line) and not line[1:].isdigit()) and (not self.isNameInTable(name, self.__m_Symbols)):
+                #test if symbol is added at the right address
+                #print("symbol is {0}, address is {1}".format(name, address))
+                #end test
+                self.__m_Symbols.append(Instruction.Instruction(name, address))
+                address += 1
 
     #go ahead and populate instruction table
     def populateComps(self):
